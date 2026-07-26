@@ -40,6 +40,10 @@ public class SecurityConfig {
                                 HttpMethod.POST,
                                 "/api/v1/auth/register"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/auth/login"
+                        ).permitAll()
                         .anyRequest().denyAll()
                 )
                 .build();
