@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - develop
       - "**"
   pull_request:
     branches:
@@ -12,8 +10,27 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: image_upload_test
+          POSTGRES_USER: ${{ secrets.CI_DB_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_URL: ${{ secrets.CI_DB_URL }}
+      DB_USERNAME: ${{ secrets.CI_DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
 
     steps:
       - name: Checkout repository
@@ -23,11 +40,11 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: "25"
           cache: maven
 
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
-      - name: Build project
+      - name: Build and test project
         run: ./mvnw clean verify
