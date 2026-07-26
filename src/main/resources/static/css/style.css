@@ -85,3 +85,18 @@ button:disabled {
 .error {
     color: #dc2626;
 }
+.account-link {
+    margin-top: 20px;
+    text-align: center;
+    color: #64748b;
+}
+
+.account-link a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.account-link a:hover {
+    text-decoration: underline;
+}
