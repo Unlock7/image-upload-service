@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Service
@@ -45,7 +45,7 @@ public class AuthService {
                 username,
                 email,
                 passwordEncoder.encode(request.getPassword()),
-                Instant.now()
+                LocalDateTime.now()
         );
 
         User savedUser = userRepository.save(user);
