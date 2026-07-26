@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<main class="card">
+    <h1>Create account</h1>
+    <p class="subtitle">Register for the Image Upload Service</p>
+
+    <form id="register-form">
+        <label for="username">Username</label>
+        <input
+                id="username"
+                name="username"
+                type="text"
+                minlength="3"
+                maxlength="50"
+                required
+        >
+
+        <label for="email">Email</label>
+        <input
+                id="email"
+                name="email"
+                type="email"
+                maxlength="255"
+                required
+        >
+
+        <label for="password">Password</label>
+        <input
+                id="password"
+                name="password"
+                type="password"
+                minlength="8"
+                maxlength="72"
+                required
+        >
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p id="message" role="alert"></p>
+</main>
+
+<script>
+    const form = document.getElementById("register-form");
+    const message = document.getElementById("message");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        message.textContent = "";
+        message.className = "";
+        button.disabled = true;
+        button.textContent = "Registering...";
+
+        const requestBody = {
+            username: form.username.value.trim(),
+            email: form.email.value.trim(),
+            password: form.password.value
+        };
+
+        try {
+            const response = await fetch("/api/v1/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Registration failed");
+            }
+
+            message.textContent = "Registration successful!";
+            message.className = "success";
+            form.reset();
+        } catch (error) {
+            message.textContent = error.message;
+            message.className = "error";
+        } finally {
+            button.disabled = false;
+            button.textContent = "Register";
+        }
+    });
+</script>
+
+</body>
+</html>
