@@ -3,37 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account</title>
+    <title>Login</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
 <main class="card">
-    <h1>Create account</h1>
-    <p class="subtitle">Register for the Image Upload Service</p>
+    <h1>Welcome back</h1>
+    <p class="subtitle">Log in to the Image Upload Service</p>
 
-    <p class="account-link">
-        Already have an account?
-        <a href="/login.html">Log in</a>
-    </p>
-
-    <form id="register-form">
-        <label for="username">Username</label>
-        <input
-                id="username"
-                name="username"
-                type="text"
-                minlength="3"
-                maxlength="50"
-                required
-        >
-
+    <form id="login-form">
         <label for="email">Email</label>
         <input
                 id="email"
                 name="email"
                 type="email"
-                maxlength="255"
                 required
         >
 
@@ -42,19 +26,23 @@
                 id="password"
                 name="password"
                 type="password"
-                minlength="8"
                 maxlength="72"
                 required
         >
 
-        <button type="submit">Register</button>
+        <button type="submit">Log in</button>
     </form>
 
     <p id="message" role="alert"></p>
+
+    <p class="account-link">
+        Don’t have an account?
+        <a href="/">Create account</a>
+    </p>
 </main>
 
 <script>
-    const form = document.getElementById("register-form");
+    const form = document.getElementById("login-form");
     const message = document.getElementById("message");
     const button = form.querySelector("button");
 
@@ -64,30 +52,30 @@
         message.textContent = "";
         message.className = "";
         button.disabled = true;
-        button.textContent = "Registering...";
+        button.textContent = "Logging in...";
 
         const requestBody = {
-            username: form.username.value.trim(),
             email: form.email.value.trim(),
             password: form.password.value
         };
 
         try {
-            const response = await fetch("/api/v1/auth/register", {
+            const response = await fetch("/api/v1/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
+                credentials: "same-origin",
                 body: JSON.stringify(requestBody)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || "Registration failed");
+                throw new Error(data.message || "Login failed");
             }
 
-            message.textContent = "Registration successful!";
+            message.textContent = "Login successful!";
             message.className = "success";
             form.reset();
         } catch (error) {
@@ -95,7 +83,7 @@
             message.className = "error";
         } finally {
             button.disabled = false;
-            button.textContent = "Register";
+            button.textContent = "Log in";
         }
     });
 </script>

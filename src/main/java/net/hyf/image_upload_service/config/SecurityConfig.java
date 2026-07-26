@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/index.html",
+                                "/login.html",
                                 "/css/**",
                                 "/error"
                         ).permitAll()
