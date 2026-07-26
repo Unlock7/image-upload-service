@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(
+    public ResponseEntity<ErrorResponse> handleConflictException(
             ConflictException exception,
             HttpServletRequest request
     ) {
@@ -31,20 +31,34 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = createErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(response);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(
+    public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException exception,
             HttpServletRequest request
     ) {
-        String message = exception
-                .getBindingResult()
+        String message = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error ->
-                        error.getField() + ": " +
-                                error.getDefaultMessage()
+                        error.getField() + ": " + error.getDefaultMessage()
                 )
-                .collect(Collectors.joining("; "));
+                .collect(Collectors.joining(", "));
 
         ErrorResponse response = createErrorResponse(
                 HttpStatus.BAD_REQUEST,
@@ -58,13 +72,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataConflict(
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException exception,
             HttpServletRequest request
     ) {
         ErrorResponse response = createErrorResponse(
                 HttpStatus.CONFLICT,
-                "Username or email already exists",
+                "This username or email is already registered",
                 request.getRequestURI()
         );
 
