@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload Service</title>
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+
+<header class="navbar">
+    <h1>ImageHub</h1>
+
+    <nav>
+        <a href="#upload">Upload</a>
+        <a href="#my-images">My Images</a>
+        <a href="#gallery">Gallery</a>
+        <button id="logoutButton">Logout</button>
+    </nav>
+</header>
+
+<main>
+    <section class="welcome-section">
+        <p class="welcome-label">IMAGEHUB</p>
+        <h2>Welcome to Image Upload Service</h2>
+        <p>
+            Upload, organize, search and share your images with AI-powered tags.
+        </p>
+
+        <div class="search-box">
+            <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="Search car, sunset, beach, orange..."
+            >
+            <button id="searchButton">Search</button>
+        </div>
+    </section>
+
+    <section id="upload" class="panel">
+        <h2>Upload Image</h2>
+
+        <form id="uploadForm">
+            <input
+                    id="imageFile"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    required
+            >
+
+            <input
+                    id="imageDescription"
+                    type="text"
+                    placeholder="Describe your image"
+                    maxlength="255"
+                    required
+            >
+
+            <label class="checkbox">
+                <input id="publicImage" type="checkbox" checked>
+                Make image public
+            </label>
+
+            <button type="submit">Upload Image</button>
+        </form>
+
+        <p id="uploadMessage"></p>
+    </section>
+
+    <section id="my-images" class="panel">
+        <div class="section-heading">
+            <h2>My Images</h2>
+            <button id="loadMyImages">Refresh</button>
+        </div>
+
+        <div id="myImagesGrid" class="image-grid"></div>
+    </section>
+
+    <section id="gallery" class="panel">
+        <div class="section-heading">
+            <h2>Public Images</h2>
+            <span>Up to 50 images</span>
+        </div>
+
+        <div id="galleryGrid" class="image-grid"></div>
+    </section>
+</main>
+
+<script>
+    const uploadForm = document.getElementById("uploadForm");
+    const uploadMessage = document.getElementById("uploadMessage");
+    const galleryGrid = document.getElementById("galleryGrid");
+    const myImagesGrid = document.getElementById("myImagesGrid");
+
+    async function loadPublicImages(search = "") {
+        const url = search
+            ? `/api/v1/images/search?q=${encodeURIComponent(search)}`
+            : "/api/v1/images?limit=50";
+
+        const response = await fetch(url, {
+            credentials: "same-origin"
+        });
+
+        if (!response.ok) throw new Error("Unable to load images");
+
+        const images = await response.json();
+        renderImages(galleryGrid, images, false);
+    }
+
+    async function loadMyImages() {
+        const response = await fetch("/api/v1/images/me", {
+            credentials: "same-origin"
+        });
+
+        if (!response.ok) throw new Error("Unable to load your images");
+
+        const images = await response.json();
+        renderImages(myImagesGrid, images, true);
+    }
+
+    function renderImages(container, images, canDelete) {
+        container.innerHTML = "";
+
+        if (!images || images.length === 0) {
+            container.innerHTML = "<p class='empty'>No images found.</p>";
+            return;
+        }
+
+        images.slice(0, 50).forEach(image => {
+            const card = document.createElement("article");
+            card.className = "image-card";
+
+            card.innerHTML = `
+                <img
+                    src="${image.imageUrl}"
+                    alt="${image.description || "Uploaded image"}"
+                >
+                <div class="image-info">
+                    <h3>${image.description || "Untitled image"}</h3>
+                    <p>${image.tags?.join(", ") || "AI tags pending..."}</p>
+                    ${
+                canDelete
+                    ? `<button class="delete-button" data-id="${image.id}">
+                                 Delete
+                               </button>`
+                    : ""
+            }
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+        container.querySelectorAll(".delete-button").forEach(button => {
+            button.addEventListener("click", async () => {
+                if (!confirm("Delete this image?")) return;
+
+                await fetch(`/api/v1/images/${button.dataset.id}`, {
+                    method: "DELETE",
+                    credentials: "same-origin"
+                });
+
+                await loadMyImages();
+                await loadPublicImages();
+            });
+        });
+    }
+
+    uploadForm.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const file = document.getElementById("imageFile").files[0];
+        const description =
+            document.getElementById("imageDescription").value.trim();
+        const isPublic =
+            document.getElementById("publicImage").checked;
+
+        if (file.size > 10 * 1024 * 1024) {
+            uploadMessage.textContent = "Image must be smaller than 10MB.";
+            uploadMessage.className = "error";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("description", description);
+        formData.append("public", isPublic);
+
+        const response = await fetch("/api/v1/images", {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+        });
+
+        if (response.ok) {
+            uploadMessage.textContent = "Image uploaded successfully.";
+            uploadMessage.className = "success";
+            uploadForm.reset();
+
+            await loadMyImages();
+            await loadPublicImages();
+        } else {
+            uploadMessage.textContent = "Image upload failed.";
+            uploadMessage.className = "error";
+        }
+    });
+
+    document.getElementById("searchButton").addEventListener("click", () => {
+        const search = document.getElementById("searchInput").value.trim();
+        loadPublicImages(search);
+    });
+
+    document.getElementById("loadMyImages")
+        .addEventListener("click", loadMyImages);
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+        await fetch("/api/v1/auth/logout", {
+            method: "POST",
+            credentials: "same-origin"
+        });
+
+        window.location.href = "/login.html";
+    });
+
+    loadPublicImages();
+    loadMyImages();
+</script>
+
+</body>
+</html>
