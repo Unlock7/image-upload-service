@@ -5,3 +5,9 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    storage:
+      endpoint: ${B2_ENDPOINT}
+      region: ${B2_REGION}
+      bucket-name: ${B2_BUCKET_NAME}
+      key-id: ${B2_KEY_ID}
+      application-key: ${B2_APPLICATION_KEY}
