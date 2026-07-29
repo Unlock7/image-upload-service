@@ -28,9 +28,15 @@ jobs:
           --health-retries=5
 
     env:
-      DB_URL: ${{ secrets.CI_DB_URL }}
+      DB_URL: jdbc:postgresql://localhost:5432/image_upload_test
       DB_USERNAME: ${{ secrets.CI_DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+
+      B2_ENDPOINT: https://s3.eu-central-003.backblazeb2.com
+      B2_REGION: eu-central-003
+      B2_BUCKET_NAME: ci-test-bucket
+      B2_KEY_ID: ci-test-key
+      B2_APPLICATION_KEY: ci-test-application-key
 
     steps:
       - name: Checkout repository
