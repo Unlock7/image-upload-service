@@ -77,7 +77,10 @@
 
             message.textContent = "Login successful!";
             message.className = "success";
-            form.reset();
+
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 500);
         } catch (error) {
             message.textContent = error.message;
             message.className = "error";
