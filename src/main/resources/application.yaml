@@ -5,9 +5,9 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    storage:
-      endpoint: ${B2_ENDPOINT}
-      region: ${B2_REGION}
-      bucket-name: ${B2_BUCKET_NAME}
-      key-id: ${B2_KEY_ID}
-      application-key: ${B2_APPLICATION_KEY}
+  storage:
+    endpoint: ${B2_ENDPOINT:https://s3.eu-central-003.backblazeb2.com}
+    region: ${B2_REGION:eu-central-003}
+    bucket-name: ${B2_BUCKET_NAME:ci-test-bucket}
+    key-id: ${B2_KEY_ID:ci-test-key}
+    application-key: ${B2_APPLICATION_KEY:ci-test-application-key}
