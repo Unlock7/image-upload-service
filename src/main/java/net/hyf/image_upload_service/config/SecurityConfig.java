@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/",
                                 "/index.html",
                                 "/login.html",
+                                "/home.html",
                                 "/css/**",
                                 "/error"
                         ).permitAll()
