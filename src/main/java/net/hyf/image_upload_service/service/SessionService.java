@@ -1,6 +1,7 @@
 package net.hyf.image_upload_service.service;
 
 import lombok.RequiredArgsConstructor;
+import net.hyf.image_upload_service.exception.UnauthorizedException;
 import net.hyf.image_upload_service.model.Session;
 import net.hyf.image_upload_service.repository.SessionRepository;
 import org.springframework.stereotype.Service;
@@ -47,5 +48,18 @@ public class SessionService {
         return Base64.getUrlEncoder()
                 .withoutPadding()
                 .encodeToString(randomBytes);
+    }
+    public Long requireValidUserId(String token) {
+        if (token == null || token.isBlank()) {
+            throw new UnauthorizedException("Authentication is required");
+        }
+
+        return sessionRepository.findValidByToken(token)
+                .map(Session::getUserId)
+                .orElseThrow(() ->
+                        new UnauthorizedException(
+                                "Session is invalid or expired"
+                        )
+                );
     }
 }
