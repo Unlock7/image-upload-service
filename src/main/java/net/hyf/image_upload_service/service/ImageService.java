@@ -1,6 +1,8 @@
 package net.hyf.image_upload_service.service;
 
 import lombok.RequiredArgsConstructor;
+import net.hyf.image_upload_service.dto.image.ImageContent;
+import org.springframework.web.server.ResponseStatusException;
 import net.hyf.image_upload_service.dto.image.ImageResponse;
 import net.hyf.image_upload_service.dto.image.ImageTags;
 import net.hyf.image_upload_service.exception.InvalidImageException;
@@ -152,8 +154,25 @@ public class ImageService {
         try {
             objectStorageService.delete(storageKey);
         } catch (RuntimeException cleanupException) {
-            // Preserve the original database exception.
-            // Log this cleanup failure when logging is added.
+
         }
+    }
+    public ImageContent getContent(Long imageId) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Image not found"
+                        )
+                );
+
+        byte[] data = objectStorageService.download(
+                image.getStorageKey()
+        );
+
+        return new ImageContent(
+                data,
+                image.getContentType()
+        );
     }
 }
