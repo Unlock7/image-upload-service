@@ -1,6 +1,9 @@
 package net.hyf.image_upload_service.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.hyf.image_upload_service.dto.image.ImageContent;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import net.hyf.image_upload_service.dto.image.ImageResponse;
 import net.hyf.image_upload_service.service.ImageService;
 import net.hyf.image_upload_service.service.SessionService;
@@ -53,5 +56,21 @@ public class ImageController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+    @GetMapping("/{imageId}/content")
+    public ResponseEntity<byte[]> getContent(
+            @PathVariable Long imageId
+    ) {
+        ImageContent content = imageService.getContent(imageId);
+
+        return ResponseEntity
+                .ok()
+                .contentType(
+                        MediaType.parseMediaType(
+                                content.contentType()
+                        )
+                )
+                .contentLength(content.data().length)
+                .body(content.data());
     }
 }
